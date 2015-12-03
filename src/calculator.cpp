@@ -5,6 +5,7 @@
 #include <cmath>
 #include <map>
 #include <vector>
+#include <exception>
 
 using namespace std;
 
@@ -44,6 +45,9 @@ class Calculator {
             {")", 0},
         };
 
+        /**
+         * @brief calculate expression
+         */
         void calculate() {
             if (expression.empty()) {
                 return;
@@ -51,8 +55,8 @@ class Calculator {
 
             vector<Token> tokens = getTokens(expression);
 
-            printTokens(tokens);
-            return;
+//            printTokens(tokens);
+//            return;
 
             stack<double> digitStack;
             stack<Token> operatorsStack;
@@ -65,20 +69,23 @@ class Calculator {
                 } else if (token.value == "(") {            // if "("
                     operatorsStack.push(token);
                 } else if (token.value == ")") {
+                    //  to calculating the expression in parentheses
                     while (operatorsStack.top().value != "(") {
-//                        cout << operatorsStack.top() << endl;
+                        if (digitStack.empty() || operatorsStack.empty()) {
+                            throw "incorrect expression";
+                        }
                         perfomAction(digitStack, operatorsStack);
                     }
                     if (operatorsStack.top().value == "(") {
                         operatorsStack.pop();
                     }
                 } else if(token.type == "operator") {    // if operator
-                    if (!operatorsStack.empty() && isLessPriority(token.priority, operatorsStack.top().priority)) {
-                        perfomAction(digitStack, operatorsStack);
+                    //  to calculating the expression until operator in stack higer priority than current operator
+                    while (!operatorsStack.empty() && isLessPriority(token.priority, operatorsStack.top().priority)) {
+                            perfomAction(digitStack, operatorsStack);
                     }
 
                     operatorsStack.push(token);
-
                 }
 
 //                printDigit(digitStack);
@@ -93,6 +100,11 @@ class Calculator {
             result = digitStack.top();
         }
 
+        /**
+         * @brief partition string into tokens
+         * @param expression
+         * @return
+         */
         vector<Token> getTokens(string expression) {
             vector<Token> tokens;
             int expressionLength = expression.length();
@@ -107,6 +119,7 @@ class Calculator {
 
                 if (isCharDigit(currentChar)) {             // if digit
                     token += currentChar;
+                    //  combining adjacent digits in the number
                     if ((i != expressionLength - 1) && isCharDigit(expression[i + 1])) {
                         continue;
                     }
@@ -131,17 +144,8 @@ class Calculator {
                     sToken.value = token;
                     sToken.priority = operators[token];
                     tokens.push_back(sToken);
-                } else if(isalpha(currentChar)) {    // if function
-                    token += currentChar;
-                    if ((i != expressionLength - 1) && isalpha(expression[i + 1])) {
-                        continue;
-                    }
-
-                    Token sToken;
-                    sToken.type = "func";
-                    sToken.value = token;
-                    sToken.priority = operators[token];
-                    tokens.push_back(sToken);
+                } else {
+                    throw "undefined token [" + string(&currentChar) + "]";
                 }
 
                 token = "";
@@ -170,38 +174,55 @@ class Calculator {
         double calculateVars(stack<double>& digitStack, string opr) {
 
             if (opr == "+") {
+                if (digitStack.size() < 2) {
+                    throw "incorrect expression";
+                }
                 double var2 = getVarible(digitStack);
                 double var1 = getVarible(digitStack);
 
                 return var1 + var2;
             } else if (opr == "-") {
+                if (digitStack.size() < 2) {
+                    throw "incorrect expression";
+                }
                 double var2 = getVarible(digitStack);
                 double var1 = getVarible(digitStack);
 
                 return var1 - var2;
             } else if (opr == "*") {
+                if (digitStack.size() < 2) {
+                    throw "incorrect expression";
+                }
                 double var2 = getVarible(digitStack);
                 double var1 = getVarible(digitStack);
 
                 return var1 * var2;
             } else if (opr == "/") {
+                if (digitStack.size() < 2) {
+                    throw "incorrect expression";
+                }
                 double var2 = getVarible(digitStack);
                 double var1 = getVarible(digitStack);
 
                 return var1 / var2;
             } else if (opr == "^") {
+                if (digitStack.size() < 2) {
+                    throw "incorrect expression";
+                }
                 double var2 = getVarible(digitStack);
                 double var1 = getVarible(digitStack);
 
                 return pow(var1, var2);
             } else if (opr == "-x") {
+                if (digitStack.empty()) {
+                    throw "incorrect expression";
+                }
                 double var1 = getVarible(digitStack);
 
                 return var1 * (-1);
+            } else {
+                throw "unknown [" + opr + "] operator!";
             }
-
-            cout << "unknown [" << opr << "] operator!" << endl;
-            return 0;
         }
 
         double getVarible(stack<double>& digitStack) {
@@ -215,18 +236,21 @@ class Calculator {
             return (token <=  tokenInStack);
         }
 
+        //  for debuging
         void printTokens(vector<Token>& tokens) {
             for (vector<Token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
                 pintToken(*it);
             }
         }
 
+        //  for debuging
         void pintToken(Token token) {
             cout << "[" << token.value << "]";
             cout << "[" << token.type << "]";
             cout << "[" << token.priority << "]" << endl;
         }
 
+        //  for debuging
         void printOperators(stack<Token> st) {
             if (st.empty()) {
                 std::cout << "empty" << endl;
@@ -241,6 +265,7 @@ class Calculator {
             std::cout << endl;
         }
 
+        //  for debuging
         void printDigit(stack<double> st) {
             if (st.empty()) {
                 std::cout << "empty" << endl;
@@ -272,8 +297,8 @@ void test() {
     test3.expr = "12 * 5 + (-5) / 10";
     test3.result = 59.5;
 
-    test4.expr = "2 + sin(1)";
-    test4.result = 59.5;
+    test4.expr = "2 * 2 ^ 2 / 8 + 5";
+    test4.result = 6;
 
     testExpression exp[] {test1, test2, test3, test4};
 
@@ -291,17 +316,17 @@ void test() {
 
 
 int main() {
-
+    //  for testing
     test();
 
-    cout << "Enter expression: ";
+    while (true) {
+        cout << "Enter expression: ";
+        string expression;
+        getline(cin, expression);
 
-    string expression;
-    getline(cin, expression);
-
-
-    Calculator calc(expression);
-    calc.showResult();
+        Calculator calc(expression);
+        calc.showResult();
+    }
 
     return 0;
 }
