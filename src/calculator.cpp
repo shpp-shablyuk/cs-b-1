@@ -7,6 +7,8 @@
 #include <vector>
 #include <exception>
 
+#include "customStack.h"
+
 using namespace std;
 
 class Calculator {
@@ -58,8 +60,8 @@ class Calculator {
 //            printTokens(tokens);
 //            return;
 
-            stack<double> digitStack;
-            stack<Token> operatorsStack;
+            CustomStack<double> digitStack;
+            CustomStack<Token> operatorsStack;
 
             for (vector<Token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
                 Token token = *it;
@@ -154,7 +156,7 @@ class Calculator {
             return tokens;
         }
 
-        void perfomAction(stack<double>& digitStack, stack<Token>& operatorsStack){
+        void perfomAction(CustomStack<double>& digitStack, CustomStack<Token>& operatorsStack){
             double res = calculateVars(digitStack, operatorsStack.top().value);
             digitStack.push(res);
 
@@ -171,7 +173,7 @@ class Calculator {
             return (isdigit(c) || c == '.') ? true : false;
         }
 
-        double calculateVars(stack<double>& digitStack, string opr) {
+        double calculateVars(CustomStack<double>& digitStack, string opr) {
 
             if (opr == "+") {
                 if (digitStack.size() < 2) {
@@ -225,7 +227,7 @@ class Calculator {
             }
         }
 
-        double getVarible(stack<double>& digitStack) {
+        double getVarible(CustomStack<double>& digitStack) {
             double var = digitStack.top();
             digitStack.pop();
 
@@ -251,7 +253,7 @@ class Calculator {
         }
 
         //  for debuging
-        void printOperators(stack<Token> st) {
+        void printOperators(CustomStack<Token> st) {
             if (st.empty()) {
                 std::cout << "empty" << endl;
                 return;
@@ -266,7 +268,7 @@ class Calculator {
         }
 
         //  for debuging
-        void printDigit(stack<double> st) {
+        void printDigit(CustomStack<double> st) {
             if (st.empty()) {
                 std::cout << "empty" << endl;
                 return;
