@@ -8,6 +8,7 @@
 #include <exception>
 
 #include "customStack.h"
+#include "customVector.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ class Calculator {
                 return;
             }
 
-            vector<Token> tokens = getTokens(expression);
+            CustomVector<Token> tokens = getTokens(expression);
 
 //            printTokens(tokens);
 //            return;
@@ -63,7 +64,7 @@ class Calculator {
             CustomStack<double> digitStack;
             CustomStack<Token> operatorsStack;
 
-            for (vector<Token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
+            for (CustomVector<Token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
                 Token token = *it;
 
                 if (token.type == "digit") {             // if digit
@@ -107,8 +108,8 @@ class Calculator {
          * @param expression
          * @return
          */
-        vector<Token> getTokens(string expression) {
-            vector<Token> tokens;
+        CustomVector<Token> getTokens(string expression) {
+            CustomVector<Token> tokens;
             int expressionLength = expression.length();
             string token = "";
 
@@ -241,12 +242,12 @@ class Calculator {
         //  for debuging
         void printTokens(vector<Token>& tokens) {
             for (vector<Token>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-                pintToken(*it);
+                printToken(*it);
             }
         }
 
         //  for debuging
-        void pintToken(Token token) {
+        void printToken(Token token) {
             cout << "[" << token.value << "]";
             cout << "[" << token.type << "]";
             cout << "[" << token.priority << "]" << endl;
@@ -261,7 +262,7 @@ class Calculator {
 
             while (!st.empty())
              {
-                pintToken(st.top());
+                printToken(st.top());
                 st.pop();
              }
             std::cout << endl;
